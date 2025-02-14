@@ -1,0 +1,99 @@
+%YAML:1.0
+# SPDX-FileCopyrightText: Copyright (c) 2018-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+BaseConfig:
+  minDetectorConfidence: 0.04504140555020505
+TargetManagement:
+  enableBboxUnClipping: 0
+  preserveStreamUpdateOrder: 0
+  maxTargetsPerStream: 150
+  minIouDiff4NewTarget: 0.7493289488858955
+  minTrackerConfidence: 0.31790113613788024
+  probationAge: 8
+  maxShadowTrackingAge: 75
+  earlyTerminationAge: 1
+TrajectoryManagement:
+  useUniqueID: 0
+  enableReAssoc: 1
+  minMatchingScore4Overall: 0.1826460509416077
+  minTrackletMatchingScore: 0.43307285475707674
+  minMatchingScore4ReidSimilarity: 0.6101580191977841
+  matchingScoreWeight4TrackletSimilarity: 0.019947099953910568
+  matchingScoreWeight4ReidSimilarity: 0.4184342367280858
+  minTrajectoryLength4Projection: 39
+  prepLength4TrajectoryProjection: 50
+  trajectoryProjectionLength: 21
+  maxAngle4TrackletMatching: 138
+  minSpeedSimilarity4TrackletMatching: 0.044282528905539784
+  minBboxSizeSimilarity4TrackletMatching: 0.5740444887481395
+  maxTrackletMatchingTimeSearchRange: 20
+  trajectoryProjectionProcessNoiseScale: 0.0100
+  trajectoryProjectionMeasurementNoiseScale: 100
+  trackletSpacialSearchRegionScale: 0.2598
+  reidExtractionInterval: 0
+DataAssociator:
+  dataAssociatorType: 0
+  associationMatcherType: 1
+  checkClassMatch: 1
+  minMatchingScore4Overall: 0.40842489679919347
+  minMatchingScore4SizeSimilarity: 0.5028785603014438
+  minMatchingScore4Iou: 0.33759408085386783
+  minMatchingScore4VisualSimilarity: 0.4418493290256158
+  matchingScoreWeight4VisualSimilarity: 0.8883782176081545
+  matchingScoreWeight4SizeSimilarity: 0.6331817143070809
+  matchingScoreWeight4Iou: 0.13649225476454815
+  tentativeDetectorConfidence: 0.11364853643615452
+  minMatchingScore4TentativeIou: 0.5926078020048815
+StateEstimator:
+  stateEstimatorType: 1
+  processNoiseVar4Loc: 5234.458953126677
+  processNoiseVar4Size: 915.8358745665826
+  processNoiseVar4Vel: 2817.0451303588843
+  measurementNoiseVar4Detector: 100.00000584166246
+  measurementNoiseVar4Tracker: 6979.036279054437
+VisualTracker:
+  visualTrackerType: 1
+  useColorNames: 1
+  useHog: 1
+  featureImgSizeLevel: 4
+  featureFocusOffsetFactor_y: -0.21821554887423156
+  filterLr: 0.46756625154532483
+  filterChannelWeightsLr: 0.034405707625009656
+  gaussianSigma: 1.0184572640043077
+ReID:
+  reidType: 2
+  outputReidTensor: 1
+  batchSize: 100
+  workspaceSize: 1000
+  reidFeatureSize: 256
+  reidHistorySize: 100
+  inferDims: [3, 256, 128]
+  networkMode: 1
+  inputOrder: 0
+  colorFormat: 0
+  offsets: [123.6750, 116.2800, 103.5300]
+  netScaleFactor: 0.01735207
+  keepAspc: 1
+  addFeatureNormalization: 1
+  tltModelKey: nvidia_tao
+  tltEncodedModel: /opt/nvidia/deepstream/deepstream/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/resnet50_market1501_aicity156.onnx
+  modelEngineFile: /opt/nvidia/deepstream/deepstream/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/resnet50_market1501_aicity156.onnx_b100_gpu0_fp16.engine

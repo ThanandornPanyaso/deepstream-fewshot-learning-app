@@ -1,0 +1,106 @@
+%YAML:1.0
+# SPDX-FileCopyrightText: Copyright (c) 2018-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+BaseConfig:
+  minDetectorConfidence: 0.004883545260319055
+TargetManagement:
+  enableBboxUnClipping: 0
+  preserveStreamUpdateOrder: 0
+  maxTargetsPerStream: 150
+  minIouDiff4NewTarget: 0.7054695146305223
+  minTrackerConfidence: 0.16967768682664777
+  probationAge: 2
+  maxShadowTrackingAge: 88
+  earlyTerminationAge: 1
+TrajectoryManagement:
+  useUniqueID: 0
+  enableReAssoc: 1
+  minMatchingScore4Overall: 0.35605703334313143
+  minTrackletMatchingScore: 0.6068148601902262
+  minMatchingScore4ReidSimilarity: 0.853795266784728
+  matchingScoreWeight4TrackletSimilarity: 0.539380579724511
+  matchingScoreWeight4ReidSimilarity: 0.8385207893644586
+  minTrajectoryLength4Projection: 28
+  prepLength4TrajectoryProjection: 52
+  trajectoryProjectionLength: 52
+  maxAngle4TrackletMatching: 97
+  minSpeedSimilarity4TrackletMatching: 0.042118995351441854
+  minBboxSizeSimilarity4TrackletMatching: 0.4186238926222767
+  maxTrackletMatchingTimeSearchRange: 20
+  trajectoryProjectionProcessNoiseScale: 0.0100
+  trajectoryProjectionMeasurementNoiseScale: 100
+  trackletSpacialSearchRegionScale: 0.2598
+  reidExtractionInterval: 0
+  minVisibility4TrajDump: 0.22999529802061713
+DataAssociator:
+  dataAssociatorType: 0
+  associationMatcherType: 1
+  checkClassMatch: 1
+  minMatchingScore4Overall: 0.2646442965510517
+  minMatchingScore4SizeSimilarity: 0.13977472457113443
+  minMatchingScore4Iou: 0.013029105024698232
+  minMatchingScore4VisualSimilarity: 0.0012652958364466607
+  matchingScoreWeight4VisualSimilarity: 0.7443646504687247
+  matchingScoreWeight4SizeSimilarity: 0.7957067828005757
+  matchingScoreWeight4Iou: 0.5109842713040909
+  tentativeDetectorConfidence: 0.18182967177614462
+  minMatchingScore4TentativeIou: 0.15537522815548882
+StateEstimator:
+  stateEstimatorType: 3
+  processNoiseVar4Loc: 95.66378118223449
+  processNoiseVar4Vel: 52.01164249047624
+  measurementNoiseVar4Detector: 10000.0
+  measurementNoiseVar4Tracker: 54224.445821125875
+ObjectModelProjection:
+  outputVisibility: 1
+  outputFootLocation: 1
+  outputConvexHull: 1
+  cameraModelFilepath:
+    - /opt/nvidia/deepstream/deepstream/sources/apps/sample_apps/deepstream-fewshot-learning-app/configs/mtmc/cam01_matrix_config.yml
+VisualTracker:
+  visualTrackerType: 1
+  useColorNames: 1
+  useHog: 1
+  featureImgSizeLevel: 5
+  featureFocusOffsetFactor_y: -0.31632284617793127
+  filterLr: 0.3945528604918652
+  filterChannelWeightsLr: 0.025279166128345437
+  gaussianSigma: 1.560840938360662
+ReID:
+  reidType: 2
+  outputReidTensor: 1
+  batchSize: 100
+  workspaceSize: 1000
+  reidFeatureSize: 256
+  reidHistorySize: 100
+  inferDims: [3, 256, 128]
+  networkMode: 1
+  inputOrder: 0
+  colorFormat: 0
+  offsets: [127.5, 127.5, 127.5]
+  netScaleFactor: 0.007843137254902
+  keepAspc: 1
+  addFeatureNormalization: 1
+  minVisibility4GalleryUpdate: 0.5984452218975235
+  tltModelKey: nvidia_tao
+  onnxFile: /opt/nvidia/deepstream/deepstream/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/swin_tiny_v2.onnx
+  modelEngineFile: /opt/nvidia/deepstream/deepstream/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/swin_tiny_v2.onnx_b100_gpu0_fp16.engine

@@ -11,7 +11,7 @@
  */
 
 #pragma once
-
+#include <array>
 #include <condition_variable>
 #include <mutex>
 #include <string>

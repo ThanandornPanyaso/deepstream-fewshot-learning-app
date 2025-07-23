@@ -26,7 +26,11 @@
 
 #include <gst/gst.h>
 #include "deepstream_config.h"
-
+/** set the user metadata type */
+#define NVDS_CUSTOM_IMAGE_PATH_META (nvds_get_user_meta_type("NVIDIA.TRANSFER.IMAGE_PATH_META"))
+typedef struct {
+  gchar image_path[256];
+} NvDsImagePathMeta;
 typedef struct
 {
   gint anomaly_count;
@@ -57,7 +61,19 @@ typedef struct
   guint num_elements;
   float *embedding;
 } ObjEmbedding;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+// Declaration of the function
 struct timespec extract_utc_from_uri (gchar * uri);
+GstClockTime generate_ts_rfc3339_from_ts(char *buf, int buf_size,
+                                                GstClockTime ts, gchar *src_uri,
+                                                gint stream_id);
+#ifdef __cplusplus
+}
+#endif
+
+
 
 #endif /**< __DEEPSTREAM_TEST5_APP_H__ */

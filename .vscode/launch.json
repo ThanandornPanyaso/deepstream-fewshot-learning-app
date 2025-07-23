@@ -10,9 +10,36 @@
             "name": "Debug",
             "program": "${workspaceFolder}/deepstream-fewshot-learning-app",//the path of the executable file deepstream-test5
             "args": ["-c", "configs/mtmc/mtmc_config.txt", "-m", "1", "-t", "1", "-l", "5", "--message-rate", "1", "--tracker-reid", 
-            "1", "--reid-store-age", "1", "-b", "1", "-p", "1"],//arg for deepstream-test5
+            "1", "--reid-store-age", "25", "-b", "1", "-p", "1"],//arg for deepstream-test5
+            "cwd": "${workspaceFolder}",//指定工作目錄
+            "preLaunchTask": "CMake: build",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Test",
+            "program": "deepstream-test5-app",//the path of the executable file deepstream-test5
+            "args": ["-c", "configs/mtmc/mtmc_config.txt"],//arg for deepstream-test5
             "cwd": "${workspaceFolder}",//指定工作目錄
             "preLaunchTask": "CMake: build"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug",
+            "program": "/bin/bash",
+            "args": [
+                "-c",
+                "echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH && exec ${workspaceFolder}/deepstream-fewshot-learning-app -c configs/20mar/mtmc_config.txt -m 1 -t 1 -l 5 --message-rate 1 --tracker-reid 1 --reid-store-age 1 -b 1 -p 1"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "LD_LIBRARY_PATH": "/your/library/path:${env:LD_LIBRARY_PATH}"
+            },
+            "preLaunchTask": "CMake: build"
         }
+
+        
+        
     ]
 }

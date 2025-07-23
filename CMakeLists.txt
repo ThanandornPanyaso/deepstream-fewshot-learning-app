@@ -69,7 +69,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
     /opt/nvidia/deepstream/deepstream/sources/apps/apps-common/includes
     /opt/nvidia/deepstream/deepstream/sources/includes
-    /opt/nvidia/deepstream/deepstream-7.1/sources/apps/sample_apps/deepstream-fewshot-learning-app/includes
+    ./includes
     /opt/nvidia/deepstream/deepstream/sources/apps/sample_apps/deepstream-app
     ${CMAKE_CURRENT_SOURCE_DIR}/cparse
     ${CMAKE_CURRENT_SOURCE_DIR}

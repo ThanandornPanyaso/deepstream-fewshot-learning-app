@@ -96,5 +96,5 @@ ReID:
   keepAspc: 1
   addFeatureNormalization: 1
   tltModelKey: nvidia_tao
-  onnxFile: /home/bb24902/splits_output/combined_dataset/results/swin_base_tea_fixb128/train/reid_model_latest.onnx
-  modelEngineFile: /home/bb24902/splits_output/combined_dataset/results/swin_base_tea_fixb128/train/reid_model_latest.onnx_b100_gpu0_fp16.engine
+  onnxFile: ../../models/reid_model_latest.onnx
+  modelEngineFile: ../../models/reid_model_latest.onnx_b100_gpu0_fp16.engine

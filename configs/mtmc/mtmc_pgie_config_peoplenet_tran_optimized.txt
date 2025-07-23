@@ -24,9 +24,9 @@
 gpu-id=0
 offsets=123.675;116.28;103.53
 net-scale-factor=0.0173520735728
-labelfile-path=/home/bb24902/deepstream-fewshot-learning-app/models/peoplenet_transformer/labels.txt
-model-engine-file=/home/bb24902/deepstream-fewshot-learning-app/models/peoplenet_transformer/resnet50_peoplenet_transformer_op17.onnx_b2_gpu1_fp16.engine
-onnx-file=/home/bb24902/deepstream-fewshot-learning-app/models/peoplenet_transformer/resnet50_peoplenet_transformer_op17.onnx
+labelfile-path=../../models/peoplenet_transformer/labels.txt
+model-engine-file=../../models/peoplenet_transformer/resnet50_peoplenet_transformer_op17.onnx_b2_gpu1_fp16.engine
+onnx-file=../../models/peoplenet_transformer/resnet50_peoplenet_transformer_op17.onnx
 batch-size=1
 network-mode=2
 num-detected-classes=4
@@ -37,7 +37,7 @@ infer-dims=3;544;960
 workspace-size=1048576
 cluster-mode=4
 parse-bbox-func-name=NvDsInferParseCustomDDETRTAO
-custom-lib-path=/home/bb24902/deepstream-fewshot-learning-app/post_processor/libnvds_infercustomparser_tao.so
+custom-lib-path=../../post_processor/libnvds_infercustomparser_tao.so
 filter-out-class-ids=0;2;3
 
 [class-attrs-all]

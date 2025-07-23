@@ -32,16 +32,16 @@ NVDS_VERSION:=7.1
 
 LIB_INSTALL_DIR?=/opt/nvidia/deepstream/deepstream-$(NVDS_VERSION)/lib/
 APP_INSTALL_DIR?=/opt/nvidia/deepstream/deepstream-$(NVDS_VERSION)/bin/
-
+SAMPLE_INSTALL_DIR = /opt/nvidia/deepstream/deepstream-$(NVDS_VERSION)/sources/apps
 ifeq ($(TARGET_DEVICE),aarch64)
   CFLAGS:= -DPLATFORM_TEGRA
 endif
 
-SRCS:= deepstream_fewshot_learning_app.c deepstream_utc.c deepstream_nvdsanalytics_meta.cpp image_meta_consumer.cpp image_meta_producer.cpp capture_time_rules.cpp
-SRCS+= ../deepstream-app/deepstream_app.c ../deepstream-app/deepstream_app_config_parser.c
-SRCS+= ../deepstream-app/deepstream_app_config_parser_yaml.cpp
-SRCS+= $(wildcard ../../apps-common/src/*.c)
-SRCS+= $(wildcard ../../apps-common/src/deepstream-yaml/*.cpp)
+SRCS:= deepstream_fewshot_learning_app.c deepstream_utc.c deepstream_nvdsanalytics_meta.cpp image_meta_consumer.cpp image_meta_consumer_wrapper.cpp image_meta_producer.cpp capture_time_rules.cpp deepstream_transfer_learning_meta.cpp
+SRCS+= $(SAMPLE_INSTALL_DIR)/sample_apps/deepstream-app/deepstream_app.c $(SAMPLE_INSTALL_DIR)/sample_apps/deepstream-app/deepstream_app_config_parser.c
+SRCS+= $(SAMPLE_INSTALL_DIR)/sample_apps/deepstream-app/deepstream_app_config_parser_yaml.cpp
+SRCS+= $(wildcard $(SAMPLE_INSTALL_DIR)/apps-common/src/*.c)
+SRCS+= $(wildcard $(SAMPLE_INSTALL_DIR)/apps-common/src/deepstream-yaml/*.cpp)
 
 INCS:= $(wildcard *.h)
 
@@ -50,16 +50,16 @@ PKGS:= gstreamer-1.0 gstreamer-video-1.0 x11 json-glib-1.0
 OBJS:= $(SRCS:.c=.o)
 OBJS:= $(OBJS:.cpp=.o)
 
-CFLAGS+= -I../../apps-common/includes \
-                 -I../../../includes \
+CFLAGS+= -I$(SAMPLE_INSTALL_DIR)/apps-common/includes \
+                 -I /opt/nvidia/deepstream/deepstream/sources/includes \
                  -I ./includes \
-                 -I../deepstream-app/ -DDS_VERSION_MINOR=0 -DDS_VERSION_MAJOR=5 \
+                 -I $(SAMPLE_INSTALL_DIR)/sample_apps/deepstream-app/ -DDS_VERSION_MINOR=0 -DDS_VERSION_MAJOR=5 \
                  -I /usr/local/cuda-$(CUDA_VER)/include
 
 LIBS:= -L/usr/local/cuda-$(CUDA_VER)/lib64/ -lcudart
 
 LIBS+= -L$(LIB_INSTALL_DIR) -lnvdsgst_meta -lnvds_meta -lnvdsgst_helper -lnvdsgst_customhelper -lnvdsgst_smartrecord -lnvds_utils -lnvds_msgbroker -lm \
-       -lyaml-cpp -lcuda -lgstrtspserver-1.0 -ldl -Wl,-rpath,$(LIB_INSTALL_DIR)
+       -lnvds_batch_jpegenc -lyaml-cpp -lcuda -lgstrtspserver-1.0 -ldl -Wl,-rpath,$(LIB_INSTALL_DIR)
 
 CFLAGS+= $(shell pkg-config --cflags $(PKGS))
 

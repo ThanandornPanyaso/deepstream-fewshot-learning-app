@@ -21,64 +21,65 @@
 # DEALINGS IN THE SOFTWARE.
 
 BaseConfig:
-  minDetectorConfidence: 0.059091767738520054
+  minDetectorConfidence: 0.22943838218073478
 TargetManagement:
-  enableBboxUnClipping: 1
   preserveStreamUpdateOrder: 0
-  maxTargetsPerStream: 150
-  minIouDiff4NewTarget: 0.40803391831819774
-  minTrackerConfidence: 0.2379867160124702
-  probationAge: 2
-  maxShadowTrackingAge: 49
+  maxTargetsPerStream: 400
   earlyTerminationAge: 1
+  outputTerminatedTracks: 1
+  enableBboxUnClipping: 0
+  maxShadowTrackingAge: 64
+  minIouDiff4NewTarget: 0.6329505083285663
+  minTrackerConfidence: 0.8334914241970038
+  probationAge: 9
 TrajectoryManagement:
   useUniqueID: 0
   enableReAssoc: 1
-  minMatchingScore4Overall: 0.6491824364015243
-  minTrackletMatchingScore: 0.3365923298667557
-  minMatchingScore4ReidSimilarity: 0.41004668162204816
-  matchingScoreWeight4TrackletSimilarity: 0.8531794819299393
-  matchingScoreWeight4ReidSimilarity: 0.13580096342687126
-  minTrajectoryLength4Projection: 33
   prepLength4TrajectoryProjection: 53
-  trajectoryProjectionLength: 99
-  maxAngle4TrackletMatching: 70
-  minSpeedSimilarity4TrackletMatching: 0.03284195344815558
-  minBboxSizeSimilarity4TrackletMatching: 0.40454200672158597
   maxTrackletMatchingTimeSearchRange: 24
   trajectoryProjectionProcessNoiseScale: 0.01
   trajectoryProjectionMeasurementNoiseScale: 100
   trackletSpacialSearchRegionScale: 0.01
+  matchingScoreWeight4ReidSimilarity: 0.08016706183512573
+  matchingScoreWeight4TrackletSimilarity: 0.06137868158082205
+  maxAngle4TrackletMatching: 109
+  minBboxSizeSimilarity4TrackletMatching: 0.1821974497006853
+  minMatchingScore4Overall: 0.01802658341187635
+  minMatchingScore4ReidSimilarity: 0.46370889173816704
+  minSpeedSimilarity4TrackletMatching: 0.06750482824802526
+  minTrackletMatchingScore: 0.1196452468278986
+  minTrajectoryLength4Projection: 34
   reidExtractionInterval: 0
+  trajectoryProjectionLength: 48
 DataAssociator:
   dataAssociatorType: 0
   associationMatcherType: 1
   checkClassMatch: 1
-  minMatchingScore4Overall: 0.16498049370431805
-  minMatchingScore4SizeSimilarity: 0.2470318611174308
-  minMatchingScore4Iou: 0.09268843253527276
-  minMatchingScore4VisualSimilarity: 0.5306397916012133
-  matchingScoreWeight4VisualSimilarity: 0.2593903206246254
-  matchingScoreWeight4SizeSimilarity: 0.8737211144111663
-  matchingScoreWeight4Iou: 0.3538715510450657
-  tentativeDetectorConfidence: 0.07696106106777956
-  minMatchingScore4TentativeIou: 0.18259431931328785
+  matchingScoreWeight4Iou: 0.8512052426782479
+  matchingScoreWeight4SizeSimilarity: 0.19347499479023889
+  matchingScoreWeight4VisualSimilarity: 0.0744031550731008
+  minMatchingScore4Iou: 0.453411475027372
+  minMatchingScore4Overall: 0.5410975203413544
+  minMatchingScore4SizeSimilarity: 0.5135926884585114
+  minMatchingScore4TentativeIou: 0.5557388537822727
+  minMatchingScore4VisualSimilarity: 0.3154682906751356
+  tentativeDetectorConfidence: 0.7484959375011256
 StateEstimator:
   stateEstimatorType: 1
-  processNoiseVar4Loc: 5500.457806079246
-  processNoiseVar4Size: 2784.2546323956462
-  processNoiseVar4Vel: 545.3315792468695
   measurementNoiseVar4Detector: 100.00000497224985
-  measurementNoiseVar4Tracker: 294.4755412477389
+  measurementNoiseVar4Tracker: 7573.8827545885215
+  processNoiseVar4Loc: 1057.948103348378
+  processNoiseVar4Size: 7855.69455426151
+  processNoiseVar4Vel: 3775.7408269598554
 VisualTracker:
   visualTrackerType: 1
   useColorNames: 1
   useHog: 1
   featureImgSizeLevel: 3
-  featureFocusOffsetFactor_y: -0.21492658069764317
-  filterLr: 0.04747373772798158
-  filterChannelWeightsLr: 0.06898637782721721
-  gaussianSigma: 0.7195646880047487
+  featureFocusOffsetFactor_y: -0.15655361993986983
+  filterChannelWeightsLr: 0.010651706460556347
+  filterLr: 0.014704404179973013
+  gaussianSigma: 1.0384635863715812
 ReID:
   reidType: 2
   outputReidTensor: 1
@@ -95,5 +96,5 @@ ReID:
   keepAspc: 1
   addFeatureNormalization: 1
   tltModelKey: nvidia_tao
-  onnxFile: /opt/nvidia/deepstream/deepstream-7.1/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/swin_tiny_v2.onnx
-  modelEngineFile: /opt/nvidia/deepstream/deepstream-7.1/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/swin_tiny_v2.onnx_b100_gpu0_fp16.engine
+  onnxFile: models/mtmc/swin_tiny_tao.onnx
+  modelEngineFile: models/mtmc/swin_tiny_tao.onnx_b100_gpu0_fp16.engine

@@ -1,0 +1,100 @@
+%YAML:1.0
+# SPDX-FileCopyrightText: Copyright (c) 2018-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+BaseConfig:
+  minDetectorConfidence: 0.21602900244323123
+TargetManagement:
+  preserveStreamUpdateOrder: 0
+  maxTargetsPerStream: 400
+  earlyTerminationAge: 1
+  outputTerminatedTracks: 1
+  enableBboxUnClipping: 1
+  maxShadowTrackingAge: 13
+  minIouDiff4NewTarget: 0.5685563475190923
+  minTrackerConfidence: 0.8687769672309296
+  probationAge: 9
+TrajectoryManagement:
+  useUniqueID: 0
+  enableReAssoc: 1
+  prepLength4TrajectoryProjection: 53
+  maxTrackletMatchingTimeSearchRange: 24
+  trajectoryProjectionProcessNoiseScale: 0.01
+  trajectoryProjectionMeasurementNoiseScale: 100
+  trackletSpacialSearchRegionScale: 0.01
+  matchingScoreWeight4ReidSimilarity: 0.20105690227187029
+  matchingScoreWeight4TrackletSimilarity: 0.695190475919532
+  maxAngle4TrackletMatching: 178
+  minBboxSizeSimilarity4TrackletMatching: 0.7504564705192814
+  minMatchingScore4Overall: 0.25234775549575994
+  minMatchingScore4ReidSimilarity: 0.8433718945204456
+  minSpeedSimilarity4TrackletMatching: 0.09919953431512597
+  minTrackletMatchingScore: 0.5621656316037266
+  minTrajectoryLength4Projection: 12
+  reidExtractionInterval: 0
+  trajectoryProjectionLength: 17
+DataAssociator:
+  dataAssociatorType: 0
+  associationMatcherType: 1
+  checkClassMatch: 1
+  matchingScoreWeight4Iou: 0.2938054974078728
+  matchingScoreWeight4SizeSimilarity: 0.2524335257958854
+  matchingScoreWeight4VisualSimilarity: 0.769416430730332
+  minMatchingScore4Iou: 0.1085565406567612
+  minMatchingScore4Overall: 0.2450931345141465
+  minMatchingScore4SizeSimilarity: 0.17751611252614313
+  minMatchingScore4TentativeIou: 0.6575503432704017
+  minMatchingScore4VisualSimilarity: 0.6061186007085818
+  tentativeDetectorConfidence: 0.5804085363274252
+StateEstimator:
+  stateEstimatorType: 1
+  measurementNoiseVar4Detector: 100.00000497224985
+  measurementNoiseVar4Tracker: 6530.863813289015
+  processNoiseVar4Loc: 4871.277147026646
+  processNoiseVar4Size: 8423.64957983874
+  processNoiseVar4Vel: 9947.417061037251
+VisualTracker:
+  visualTrackerType: 1
+  useColorNames: 1
+  useHog: 1
+  featureImgSizeLevel: 3
+  featureFocusOffsetFactor_y: -0.15682585393421397
+  filterChannelWeightsLr: 0.08315816433058712
+  filterLr: 0.08055982927928561
+  gaussianSigma: 1.6390866926724692
+ReID:
+  reidType: 2
+  outputReidTensor: 1
+  batchSize: 100
+  workspaceSize: 4000
+  reidFeatureSize: 512
+  reidHistorySize: 200
+  inferDims: [3, 256, 128]
+  networkMode: 1
+  inputOrder: 0
+  colorFormat: 0
+  offsets: [127.5, 127.5, 127.5]
+  netScaleFactor: 0.007843137254902
+  keepAspc: 1
+  addFeatureNormalization: 1
+  tltModelKey: nvidia_tao
+  onnxFile: /home/big/deepstream-fewshot-learning-app/models/mtmc/msmt_6mar_validby_19mar_120.onnx
+  modelEngineFile: /home/big/deepstream-fewshot-learning-app/models/mtmc/msmt_6mar_validby_19mar_120.onnx_b100_gpu0_fp16.engine

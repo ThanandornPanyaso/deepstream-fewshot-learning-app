@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2019-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2023 NVIDIA CORPORATION &
+ * AFFILIATES. All rights reserved. SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -41,18 +41,19 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
-//#include <map>
-//#include <vector>
+// #include <map>
+// #include <vector>
 
+#include "analytics.h"
 #include "deepstream_app.h"
 #include "deepstream_config_file_parser.h"
+#include "glibconfig.h"
 #include "gstnvdsmeta.h"
+#include "image_meta_consumer_wrapper.h"
+#include "nvds_tracker_meta.h"
 #include "nvds_version.h"
 #include "nvdsmeta_schema.h"
-#include "nvds_tracker_meta.h"
-#include "analytics.h"
-#include "image_meta_consumer_wrapper.h"
-#include "image_meta_producer_wrapper.h"
+// #include "image_meta_producer_wrapper.h"
 
 /**
  * Logging levels
@@ -70,7 +71,7 @@
 #define INOTIFY_EVENT_SIZE (sizeof(struct inotify_event))
 #define INOTIFY_EVENT_BUF_LEN (1024 * (INOTIFY_EVENT_SIZE + 16))
 
-#define IS_YAML(file) \
+#define IS_YAML(file)                                                          \
   (g_str_has_suffix(file, ".yml") || g_str_has_suffix(file, ".yaml"))
 
 /** @{
@@ -166,7 +167,7 @@ static guint num_input_files;
 static GMutex fps_lock;
 static gdouble fps[MAX_SOURCE_BINS];
 static gdouble fps_avg[MAX_SOURCE_BINS];
-//static std::map<int, int> reid_cache;
+// static std::map<int, int> reid_cache;
 
 static Display *display = NULL;
 static Window windows[MAX_INSTANCES] = {0};
@@ -274,7 +275,7 @@ static void generate_ts_rfc3339(char *buf, int buf_size) {
   time_t tloc;
   struct tm tm_log;
   struct timespec ts;
-  char strmsec[6];  //.nnnZ\0
+  char strmsec[6]; //.nnnZ\0
 
   clock_gettime(CLOCK_REALTIME, &ts);
   memcpy(&tloc, (void *)(&ts.tv_sec), sizeof(time_t));
@@ -285,12 +286,12 @@ static void generate_ts_rfc3339(char *buf, int buf_size) {
   strncat(buf, strmsec, buf_size);
 }
 
-static GstClockTime generate_ts_rfc3339_from_ts(char *buf, int buf_size,
-                                                GstClockTime ts, gchar *src_uri,
-                                                gint stream_id) {
+GstClockTime generate_ts_rfc3339_from_ts(char *buf, int buf_size,
+                                         GstClockTime ts, gchar *src_uri,
+                                         gint stream_id) {
   time_t tloc;
   struct tm tm_log;
-  char strmsec[6];  //.nnnZ\0
+  char strmsec[6]; //.nnnZ\0
   int ms;
 
   GstClockTime ts_generated;
@@ -348,7 +349,7 @@ static GstClockTime generate_ts_rfc3339_from_ts(char *buf, int buf_size,
   if (log_level >= LOG_LVL_DEBUG) {
     LOGD("ts=%s\n", buf);
   }
-
+  // g_print("Generate time=%s, id=%d\n", buf, stream_id);
   return ts_generated;
 }
 
@@ -425,7 +426,7 @@ static gpointer meta_copy_func(gpointer data, gpointer user_data) {
                  srcMeta->embedding.embedding_length * sizeof(float));
   }
 
-  if(srcMeta->has3DTracking) {
+  if (srcMeta->has3DTracking) {
     dstMeta->has3DTracking = true;
     dstMeta->singleView3DTracking.visibility = srcMeta->singleView3DTracking.visibility;
     dstMeta->singleView3DTracking.ptWorldFeet[0] = srcMeta->singleView3DTracking.ptWorldFeet[0];
@@ -437,8 +438,7 @@ static gpointer meta_copy_func(gpointer data, gpointer user_data) {
         g_memdup(srcMeta->singleView3DTracking.convexHull.points,
                     srcMeta->singleView3DTracking.convexHull.numFilled * 2 * sizeof(gint));
 
-  }
-  else {
+  } else {
     dstMeta->has3DTracking = false;
   }
   return dstMeta;
@@ -540,7 +540,6 @@ static void generate_product_meta(gpointer data) {
 }
 #endif /**< GENERATE_DUMMY_META_EXT */
 
-
 static void destroy_embedding_queue() {
   for (gint stream_id = 0; stream_id < MAX_SOURCE_BINS; stream_id++) {
     GQueue *prev_frames_embedding = testAppCtx->streams[stream_id].frame_embedding_queue;
@@ -611,7 +610,6 @@ float *retrieve_embedding_queue(gint stream_id, gint frame_num, guint64 target_o
     }
   }
   return embedding_data;
-
 }
 
 static void push_to_embedding_queue(gint stream_id, FrameEmbedding *frame_embedding) {
@@ -642,17 +640,17 @@ static void generate_event_msg_meta(AppCtx *appCtx, gpointer data,
   meta->frameId = frame_meta->frame_num;
   meta->ts = (gchar *)g_malloc0(MAX_TIME_STAMP_LEN + 1);
   meta->objectId = (gchar *)g_malloc0(MAX_LABEL_SIZE);
- //embedding_data
+  // embedding_data
   if (embedding_data) {
     // printf("Malloc embedding: %d\n", numElements*4);
     meta->embedding.embedding_vector =
         (float *)g_malloc0(numElements * sizeof(float));
     if (embedding_on_device) {
       cudaMemcpy(meta->embedding.embedding_vector, embedding_data,
-               numElements * sizeof(float), cudaMemcpyDeviceToHost);
+                 numElements * sizeof(float), cudaMemcpyDeviceToHost);
     } else {
       cudaMemcpy(meta->embedding.embedding_vector, embedding_data,
-               numElements * sizeof(float), cudaMemcpyHostToHost);
+                 numElements * sizeof(float), cudaMemcpyHostToHost);
     }
     meta->embedding.embedding_length = numElements;
   } else {
@@ -660,36 +658,38 @@ static void generate_event_msg_meta(AppCtx *appCtx, gpointer data,
   }
 
   meta->has3DTracking = false;
- 
- 
- /*  for (NvDsMetaList *l_user = obj_params->obj_user_meta_list;
-             l_user != NULL; l_user = l_user->next) {
-          NvDsUserMeta *user_meta = (NvDsUserMeta *)l_user->data;
-          
-    if (user_meta->base_meta.meta_type == NVDS_OBJ_IMAGE_FOOT_LOCATION) {
-      meta->has3DTracking = true;
-      float *pPtFeet = (float*)user_meta->user_meta_data;
-      meta->singleView3DTracking.ptImgFeet[0] = pPtFeet[0];
-      meta->singleView3DTracking.ptImgFeet[1] = pPtFeet[1];
-    }
-    else if (user_meta->base_meta.meta_type == NVDS_OBJ_WORLD_FOOT_LOCATION) {
-      float *pPtFeet = (float*)user_meta->user_meta_data;
-      meta->singleView3DTracking.ptWorldFeet[0] = pPtFeet[0];
-      meta->singleView3DTracking.ptWorldFeet[1] = pPtFeet[1];
-    }
-    else if (user_meta->base_meta.meta_type == NVDS_OBJ_VISIBILITY) {
-      meta->singleView3DTracking.visibility = *(float*)user_meta->user_meta_data;
-    }
-    else if (user_meta->base_meta.meta_type == NVDS_OBJ_IMAGE_CONVEX_HULL) {
-      NvDsObjConvexHull* pConvexHull = (NvDsObjConvexHull *) user_meta->user_meta_data;
-      meta->singleView3DTracking.convexHull.points = g_malloc0(sizeof(gint) * pConvexHull->numPointsAllocated * 2);
-      meta->singleView3DTracking.convexHull.numFilled = pConvexHull->numPoints;
-      for (uint32_t i=0; i < pConvexHull->numPoints; i++) {
-        meta->singleView3DTracking.convexHull.points[2*i] = pConvexHull->list[2*i];
-        meta->singleView3DTracking.convexHull.points[2*i+1] = pConvexHull->list[2*i+1];
-      }
-    } 
-  }*/
+
+  /*  for (NvDsMetaList *l_user = obj_params->obj_user_meta_list;
+              l_user != NULL; l_user = l_user->next) {
+           NvDsUserMeta *user_meta = (NvDsUserMeta *)l_user->data;
+
+     if (user_meta->base_meta.meta_type == NVDS_OBJ_IMAGE_FOOT_LOCATION) {
+       meta->has3DTracking = true;
+       float *pPtFeet = (float*)user_meta->user_meta_data;
+       meta->singleView3DTracking.ptImgFeet[0] = pPtFeet[0];
+       meta->singleView3DTracking.ptImgFeet[1] = pPtFeet[1];
+     }
+     else if (user_meta->base_meta.meta_type == NVDS_OBJ_WORLD_FOOT_LOCATION) {
+       float *pPtFeet = (float*)user_meta->user_meta_data;
+       meta->singleView3DTracking.ptWorldFeet[0] = pPtFeet[0];
+       meta->singleView3DTracking.ptWorldFeet[1] = pPtFeet[1];
+     }
+     else if (user_meta->base_meta.meta_type == NVDS_OBJ_VISIBILITY) {
+       meta->singleView3DTracking.visibility =
+   *(float*)user_meta->user_meta_data;
+     }
+     else if (user_meta->base_meta.meta_type == NVDS_OBJ_IMAGE_CONVEX_HULL) {
+       NvDsObjConvexHull* pConvexHull = (NvDsObjConvexHull *)
+   user_meta->user_meta_data; meta->singleView3DTracking.convexHull.points =
+   g_malloc0(sizeof(gint) * pConvexHull->numPointsAllocated * 2);
+       meta->singleView3DTracking.convexHull.numFilled = pConvexHull->numPoints;
+       for (uint32_t i=0; i < pConvexHull->numPoints; i++) {
+         meta->singleView3DTracking.convexHull.points[2*i] =
+   pConvexHull->list[2*i]; meta->singleView3DTracking.convexHull.points[2*i+1] =
+   pConvexHull->list[2*i+1];
+       }
+     }
+   }*/
 
   meta->confidence = obj_params->confidence;
 
@@ -735,7 +735,7 @@ static void generate_event_msg_meta(AppCtx *appCtx, gpointer data,
     //     Info\n", sensorInfo->source_id, sensorInfo->sensor_id);
     meta->sensorStr = g_strdup(sensorInfo->sensor_name);
   }
-
+  //g_print("sensorId:%d sensorStr:%s \n",meta->sensorId, meta->sensorStr);
   (void)ts_generated;
 
   /*
@@ -744,83 +744,55 @@ static void generate_event_msg_meta(AppCtx *appCtx, gpointer data,
    * like NvDsVehicleObject / NvDsPersonObject. Then that object should
    * be handled in gst-nvmsgconv component accordingly.
    */
- AnalyticsUserMeta *user_data =   (AnalyticsUserMeta *)g_malloc0(sizeof(AnalyticsUserMeta));
-      analytics_custom_parse_direction_obj_data(obj_params,
-                                                     user_data);
+  meta->objType = NVDS_OBJECT_TYPE_PERSON;
+  NvDsPersonObject *obj =
+      (NvDsPersonObject *)g_malloc0(sizeof(NvDsPersonObject));
+  generate_person_meta(obj);
+
+  meta->extMsg = obj;
+  meta->extMsgSize = sizeof(NvDsPersonObject);
+
+    gchar *image_path = NULL;
+  for (NvDsUserMetaList *l_user = obj_params->obj_user_meta_list; l_user != NULL; l_user = l_user->next) {
+        NvDsUserMeta *user_meta = (NvDsUserMeta *)l_user->data;
+        if (user_meta->base_meta.meta_type == NVDS_CUSTOM_IMAGE_PATH_META) {
+          NvDsImagePathMeta *path_meta = (NvDsImagePathMeta *)user_meta->user_meta_data;
+          image_path = path_meta->image_path;
+          //g_print("ImgPATH %s: ", image_path);
+          break; 
+        }
+      }
+  if (image_path) obj->hair = g_strdup(image_path);
+
+  if (!appCtx->config.dsanalytics_config.enable) {
+    g_print("Unable to get nvdsanalytics src pad\n");
+    return;
+  }
+  AnalyticsUserMeta *user_data =
+      (AnalyticsUserMeta *)g_malloc0(sizeof(AnalyticsUserMeta));
+  analytics_custom_parse_direction_obj_data(obj_params, user_data);
   if (user_data->direction != NULL) {
-  
-   // meta->direction = g_strdup(user_data->direction);
 
-   meta->type = NVDS_EVENT_ENTRY;
-   meta->objType = NVDS_OBJECT_TYPE_PERSON;
-         NvDsPersonObject *obj =
-          (NvDsPersonObject *)g_malloc0(sizeof(NvDsPersonObject));
-      generate_person_meta(obj);
-      obj->gender = g_strdup(user_data->direction);
-      obj->cap = g_strdup("Crossed");
-      meta->extMsg = obj;
-    meta->extMsgSize = sizeof(NvDsPersonObject);
-  // meta->extMsgSize = sizeof(AnalyticsUserMeta);
-  }
-  else{
-    meta->type = NVDS_EVENT_MOVING;
-  }
- 
- // meta->extMsgSize = sizeof(AnalyticsUserMeta);
-  // if (model_used == APP_CONFIG_ANALYTICS_RESNET_PGIE_3SGIE_TYPE_COLOR_MAKE) {
-  //   if (class_id == RESNET10_PGIE_3SGIE_TYPE_COLOR_MAKECLASS_ID_CAR) {
-  //     meta->type = NVDS_EVENT_MOVING;
-  //     meta->objType = NVDS_OBJECT_TYPE_VEHICLE;
-  //     meta->objClassId = RESNET10_PGIE_3SGIE_TYPE_COLOR_MAKECLASS_ID_CAR;
+  obj->gender = g_strdup(user_data->direction);
+  obj->cap = g_strdup("Crossed");
 
-  //     NvDsVehicleObject *obj =
-  //         (NvDsVehicleObject *)g_malloc0(sizeof(NvDsVehicleObject));
-  //     schema_fill_sample_sgie_vehicle_metadata(obj_params, obj);
+    // meta->extMsgSize = sizeof(AnalyticsUserMeta);
+  } 
+  // if (terminated_id) {
 
-  //     meta->extMsg = obj;
-  //     meta->extMsgSize = sizeof(NvDsVehicleObject);
-  //   }
-// #ifdef GENERATE_DUMMY_META_EXT
-//     else if (class_id == RESNET10_PGIE_3SGIE_TYPE_COLOR_MAKECLASS_ID_PERSON) {
-//       meta->type = NVDS_EVENT_ENTRY;
-//       meta->objType = NVDS_OBJECT_TYPE_PERSON;
-//       meta->objClassId = RESNET10_PGIE_3SGIE_TYPE_COLOR_MAKECLASS_ID_PERSON;
-
-      // NvDsPersonObject *obj =
-      //     (NvDsPersonObject *)g_malloc0(sizeof(NvDsPersonObject));
-      // generate_person_meta(obj);
-
-      // meta->extMsg = obj;
-      // meta->extMsgSize = sizeof(NvDsPersonObject);
-//     }
-// #endif /**< GENERATE_DUMMY_META_EXT */
-//   } else if (model_used == APP_CONFIG_ANALYTICS_FSL) {
-//     meta->type = NVDS_EVENT_MOVING;
-//     meta->objType = NVDS_OBJECT_TYPE_PRODUCT;
-// #ifdef GENERATE_DUMMY_META_EXT
-//     NvDsProductObject *obj =
-//         (NvDsProductObject *)g_malloc0(sizeof(NvDsProductObject));
-//     generate_product_meta(obj);
-
-//     meta->extMsg = obj;
-//     meta->extMsgSize = sizeof(NvDsProductObject);
-// #endif
-//   } else if (model_used == APP_CONFIG_ANALYTICS_MTMC) {
-//     if (class_id == target_class) {
-//       meta->type = NVDS_EVENT_MOVING;
-//       meta->objType = NVDS_OBJECT_TYPE_PERSON;
-// #ifdef GENERATE_DUMMY_META_EXT
-//       // NvDsPersonObject *obj =
-//       //     (NvDsPersonObject *)g_malloc0(sizeof(NvDsPersonObject));
-//       // generate_person_meta(obj);
-
-//       // meta->extMsg = obj;
-//       // meta->extMsgSize = sizeof(NvDsPersonObject);
-// #endif
-//     }
-  // }
+  //   meta->type = NVDS_EVENT_STOPPED;
+  //   meta->objType = NVDS_OBJECT_TYPE_PERSON;
+  //   NvDsPersonObject *obj =
+  //       (NvDsPersonObject *)g_malloc0(sizeof(NvDsPersonObject));
+  //   generate_person_meta(obj);
+  //   obj->cap = g_strdup("Terminated");
+  //   meta->extMsg = obj;
+  //   meta->extMsgSize = sizeof(NvDsPersonObject);
+  // } 
 }
-
+void after_pgie_image_meta_save(AppCtx *appCtx, GstBuffer *buf,
+                                NvDsBatchMeta *batch_meta, guint index,
+                                ImageMetaConsumerWrapper *consumer);
 /**
  * Callback function to be called once all inferences (Primary + Secondary)
  * are done. This is opportunity to modify content of the metadata.
@@ -828,33 +800,45 @@ static void generate_event_msg_meta(AppCtx *appCtx, gpointer data,
  * are being maintained. It should be modified according to network classes
  * or can be removed altogether if not required.
  */
- void after_pgie_image_meta_save(AppCtx *appCtx, GstBuffer *buf,
-                           NvDsBatchMeta *batch_meta, guint index, ImageMetaConsumerWrapper* consumer);
+
 static void bbox_generated_probe_after_analytics(AppCtx *appCtx, GstBuffer *buf,
                                                  NvDsBatchMeta *batch_meta,
                                                  guint index) {
-  after_pgie_image_meta_save(appCtx, buf,
-                           batch_meta, index, g_img_meta_consumer);
-  
+
+
   NvDsObjectMeta *obj_meta = NULL;
   GstClockTime buffer_pts = 0;
   guint32 stream_id = 0;
+  gboolean isTerminatedTrack = FALSE;
   
-  if (!appCtx->config.dsanalytics_config.enable) {
-    g_print("Unable to get nvdsanalytics src pad\n");
-    return;
-  }
+  after_pgie_image_meta_save(appCtx, buf, batch_meta, index,
+                             g_img_meta_consumer);
   /** Find batch reid tensor in batch user meta. */
   // NvDsReidTensorBatch *pReidTensor = NULL;
   NvDsObjReid *pReidObj = NULL;
-  if (use_tracker_reid)
-  {
-    for (NvDsUserMetaList *l_batch_user = batch_meta->batch_user_meta_list; l_batch_user != NULL;
-        l_batch_user = l_batch_user->next) {
-      NvDsUserMeta *user_meta = (NvDsUserMeta *) l_batch_user->data;
-      if (user_meta && user_meta->base_meta.meta_type == NVDS_TRACKER_BATCH_REID_META) {
+  NvDsTargetMiscDataBatch *pTrackerObj = NULL;
+  if (use_tracker_reid) {
+    for (NvDsUserMetaList *l_batch_user = batch_meta->batch_user_meta_list;
+         l_batch_user != NULL; l_batch_user = l_batch_user->next) {
+      NvDsUserMeta *user_meta = (NvDsUserMeta *)l_batch_user->data;
+      if (user_meta &&
+          user_meta->base_meta.meta_type == NVDS_TRACKER_BATCH_REID_META) {
         // pReidTensor = (NvDsReidTensorBatch *) (user_meta->user_meta_data);
-        pReidObj = (NvDsObjReid *) (user_meta->user_meta_data);
+        pReidObj = (NvDsObjReid *)(user_meta->user_meta_data);
+      }
+      if (user_meta &&
+          user_meta->base_meta.meta_type == NVDS_TRACKER_TERMINATED_LIST_META) {
+        pTrackerObj = (NvDsTargetMiscDataBatch *)(user_meta->user_meta_data);
+        if (pTrackerObj != NULL) {
+          for (uint32_t i = 0; i < pTrackerObj->numFilled; ++i) {
+            NvDsTargetMiscDataStream *stream = &pTrackerObj->list[i];
+            
+            for (uint32_t j = 0; j < stream->numFilled; ++j) {
+              NvDsTargetMiscDataObject *obj = &stream->list[j];
+              g_print("StreamID %u: Terminated Unique ID: %lu\n", stream->streamID, obj->uniqueId);
+            }
+            }
+          }
       }
     }
   }
@@ -863,6 +847,15 @@ static void bbox_generated_probe_after_analytics(AppCtx *appCtx, GstBuffer *buf,
        l_frame = l_frame->next) {
     NvDsFrameMeta *frame_meta = (NvDsFrameMeta *)l_frame->data;
     stream_id = frame_meta->source_id;
+    if (testAppCtx->streams[stream_id].meta_number == 0) {
+      gchar timestamp[MAX_TIME_STAMP_LEN] = {0};
+      guint32 stream_id = frame_meta->source_id;
+      GstClockTime ts = frame_meta->buf_pts;
+      generate_ts_rfc3339_from_ts(
+          timestamp, MAX_TIME_STAMP_LEN, ts,
+          appCtx->config.multi_source_config[stream_id].uri, stream_id);
+      testAppCtx->streams[stream_id].meta_number++;
+    }
 
     //! DEBUGGER_START for ending at 5mins
     if (log_level >= 100) {
@@ -883,10 +876,9 @@ static void bbox_generated_probe_after_analytics(AppCtx *appCtx, GstBuffer *buf,
       buf_ntp_time = frame_meta->ntp_timestamp;
 
       if (buf_ntp_time < src_stream->last_ntp_time) {
-        NVGSTDS_WARN_MSG_V(
-            "Source %d: NTP timestamps are backward in time."
-            " Current: %lu previous: %lu",
-            stream_id, buf_ntp_time, src_stream->last_ntp_time);
+        NVGSTDS_WARN_MSG_V("Source %d: NTP timestamps are backward in time."
+                           " Current: %lu previous: %lu",
+                           stream_id, buf_ntp_time, src_stream->last_ntp_time);
       }
       src_stream->last_ntp_time = buf_ntp_time;
     }
@@ -898,8 +890,6 @@ static void bbox_generated_probe_after_analytics(AppCtx *appCtx, GstBuffer *buf,
 
     GList *l;
 
-
- 
     for (l = frame_meta->obj_meta_list; l != NULL; l = l->next) {
       /* Now using above information we need to form a text that should
        * be displayed on top of the bounding box, so lets form it here. */
@@ -943,23 +933,19 @@ static void bbox_generated_probe_after_analytics(AppCtx *appCtx, GstBuffer *buf,
 
         if (log_level == 99 || log_level == 100) {
           if (playback_utc == FALSE) {
-            g_print(
-                "[DEBUG]: Timestamp: Frame(frame_meta->buf_pts) "
-                "[%" GST_TIME_FORMAT
-                "] RTCP "
-                "sender report(buf_ntp_time) [%" GST_TIME_FORMAT
-                " ]; Playback (False)\n",
-                GST_TIME_ARGS(frame_meta->buf_pts),
-                GST_TIME_ARGS(buf_ntp_time));
+            g_print("[DEBUG]: Timestamp: Frame(frame_meta->buf_pts) "
+                    "[%" GST_TIME_FORMAT "] RTCP "
+                    "sender report(buf_ntp_time) [%" GST_TIME_FORMAT
+                    " ]; Playback (False)\n",
+                    GST_TIME_ARGS(frame_meta->buf_pts),
+                    GST_TIME_ARGS(buf_ntp_time));
           } else {
-            g_print(
-                "[DEBUG]: Timestamp: Frame(frame_meta->buf_pts) "
-                "[%" GST_TIME_FORMAT
-                "] RTCP "
-                "sender report(buf_ntp_time) [%" GST_TIME_FORMAT
-                " ]; Playback (True)\n",
-                GST_TIME_ARGS(frame_meta->buf_pts),
-                GST_TIME_ARGS(buf_ntp_time));
+            g_print("[DEBUG]: Timestamp: Frame(frame_meta->buf_pts) "
+                    "[%" GST_TIME_FORMAT "] RTCP "
+                    "sender report(buf_ntp_time) [%" GST_TIME_FORMAT
+                    " ]; Playback (True)\n",
+                    GST_TIME_ARGS(frame_meta->buf_pts),
+                    GST_TIME_ARGS(buf_ntp_time));
           }
         }
         if (playback_utc == FALSE) {
@@ -1023,8 +1009,7 @@ static void bbox_generated_probe_after_analytics(AppCtx *appCtx, GstBuffer *buf,
         }
 
         /** Generate NvDsEventMsgMeta for every object */
-        NvDsEventMsgMeta *msg_meta =
-            (NvDsEventMsgMeta *)g_malloc0(sizeof(NvDsEventMsgMeta));
+        NvDsEventMsgMeta *msg_meta = (NvDsEventMsgMeta *) g_malloc0(sizeof(NvDsEventMsgMeta));
         generate_event_msg_meta(
             appCtx, msg_meta, obj_meta->class_id, TRUE,
             /**< useTs NOTE: Pass FALSE for files without base-timestamp in URI
@@ -1037,7 +1022,7 @@ static void bbox_generated_probe_after_analytics(AppCtx *appCtx, GstBuffer *buf,
                   msg_meta->ts);
 
           g_print(
-              "[DEBUG]: NvDsEventMsgMeta: {'sensor-id': '%s', 'frameId': '%d', "
+              "[DEBUG]: NvDsEventMsgMeta: {'sensor-id': '%d', 'frameId': '%d', "
               "'timestamp': '%s', 'object-id': '%s', 'confidence': '%f', "
               "'bbox': [%.2f, %.2f, %.2f, %.2f]}\n",
               msg_meta->sensorId, msg_meta->frameId, msg_meta->ts,
@@ -1141,86 +1126,85 @@ static void _intr_handler(int signum) {
 /**
  * callback function to print the performance numbers of each stream.
  */
-static void
-perf_cb (gpointer context, NvDsAppPerfStruct * str)
-{
+static void perf_cb(gpointer context, NvDsAppPerfStruct *str) {
   static guint header_print_cnt = 0;
   guint i;
-  AppCtx *appCtx = (AppCtx *) context;
+  AppCtx *appCtx = (AppCtx *)context;
   guint numf = str->num_instances;
 
-  g_mutex_lock (&fps_lock);
+  g_mutex_lock(&fps_lock);
   guint active_src_count = 0;
 
   if (!str->use_nvmultiurisrcbin) {
     for (i = 0; i < numf; i++) {
       fps[i] = str->fps[i];
-      if (fps[i]){
+      if (fps[i]) {
         active_src_count++;
       }
       fps_avg[i] = str->fps_avg[i];
     }
     g_print("Active sources : %u\n", active_src_count);
     if (header_print_cnt % 20 == 0) {
-      g_print ("\n**PERF:  ");
+      g_print("\n**PERF:  ");
       for (i = 0; i < numf; i++) {
-        g_print ("FPS %d (Avg)\t", i);
+        g_print("FPS %d (Avg)\t", i);
       }
-      g_print ("\n");
+      g_print("\n");
       header_print_cnt = 0;
     }
     header_print_cnt++;
 
-    time_t t = time (NULL);
-    struct tm *tm = localtime (&t);
-    printf ("%s", asctime (tm));
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    printf("%s", asctime(tm));
     if (num_instances > 1)
-      g_print ("PERF(%d): ", appCtx->index);
+      g_print("PERF(%d): ", appCtx->index);
     else
-      g_print ("**PERF:  ");
+      g_print("**PERF:  ");
 
     for (i = 0; i < numf; i++) {
-      g_print ("%.2f (%.2f)\t", fps[i], fps_avg[i]);
+      g_print("%.2f (%.2f)\t", fps[i], fps_avg[i]);
     }
   } else {
     for (guint j = 0; j < str->active_source_size; j++) {
       i = str->source_detail[j].source_id;
       fps[i] = str->fps[i];
-      if (fps[i]){
+      if (fps[i]) {
         active_src_count++;
       }
       fps_avg[i] = str->fps_avg[i];
     }
     g_print("Active sources : %u\n", active_src_count);
     if (header_print_cnt % 20 == 0) {
-      g_print ("\n**PERF:  ");
+      g_print("\n**PERF:  ");
       for (guint j = 0; j < str->active_source_size; j++) {
         i = str->source_detail[j].source_id;
-        g_print ("FPS %d (Avg)\t", i);
+        g_print("FPS %d (Avg)\t", i);
       }
-      g_print ("\n");
+      g_print("\n");
       header_print_cnt = 0;
     }
     header_print_cnt++;
 
-    time_t t = time (NULL);
-    struct tm *tm = localtime (&t);
-    printf ("%s", asctime (tm));
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    printf("%s", asctime(tm));
     if (num_instances > 1)
-      g_print ("PERF(%d): ", appCtx->index);
+      g_print("PERF(%d): ", appCtx->index);
     else
-      g_print ("**PERF:  ");
+      g_print("**PERF:  ");
 
     g_print("\n");
     for (guint j = 0; j < str->active_source_size; j++) {
       i = str->source_detail[j].source_id;
-      g_print ("%.2f (%.2f)\t", fps[i], fps_avg[i]);
+      g_print("%.2f (%.2f)\t", fps[i], fps_avg[i]);
       if (str->stream_name_display)
-        g_print("source_id : %d stream_name %s \n",i,str->source_detail[j].stream_name);
+        g_print("source_id : %d stream_name %s \n", i,
+                str->source_detail[j].stream_name);
     }
   }
-  g_print ("\n");
-  g_mutex_unlock (&fps_lock);
+  g_print("\n");
+  g_mutex_unlock(&fps_lock);
 }
 
 /**
@@ -1287,12 +1271,11 @@ static void changemode(int dir) {
 }
 
 static void print_runtime_commands(void) {
-  g_print(
-      "\nRuntime commands:\n"
-      "\th: Print this help\n"
-      "\tq: Quit\n\n"
-      "\tp: Pause\n"
-      "\tr: Resume\n\n");
+  g_print("\nRuntime commands:\n"
+          "\th: Print this help\n"
+          "\tq: Quit\n\n"
+          "\tp: Pause\n"
+          "\tr: Resume\n\n");
 
   if (appCtx[0]->config.tiled_display_config.enable) {
     g_print(
@@ -1313,7 +1296,8 @@ static gboolean event_thread_func(gpointer arg) {
 
   // Check if all instances have quit
   for (i = 0; i < num_instances; i++) {
-    if (!appCtx[i]->quit) break;
+    if (!appCtx[i]->quit)
+      break;
   }
 
   if (i == num_instances) {
@@ -1366,59 +1350,63 @@ static gboolean event_thread_func(gpointer arg) {
     }
   }
   switch (c) {
-    case 'h':
-      print_runtime_commands();
-      break;
-    case 'p':
-      for (i = 0; i < num_instances; i++) pause_pipeline(appCtx[i]);
-      break;
-    case 'r':
-      for (i = 0; i < num_instances; i++) resume_pipeline(appCtx[i]);
-      break;
-    case 'q':
-      quit = TRUE;
-      g_main_loop_quit(main_loop);
-      ret = FALSE;
-      break;
-    case 'c':
-      if (appCtx[rcfg]->config.tiled_display_config.enable &&
-          selecting == FALSE && source_id == -1) {
-        if (log_level >= LOG_LVL_DEBUG) g_print("--selecting config file --\n");
-        c = fgetc(stdin);
-        if (c >= '0' && c <= '9') {
-          rcfg = c - '0';
-          if (rcfg < num_instances) {
-            if (log_level >= LOG_LVL_DEBUG)
-              g_print("--selecting config  %d--\n", rcfg);
-          } else {
-            if (log_level >= LOG_LVL_DEBUG)
-              g_print("--selected config file %d out of bound, reenter\n",
-                      rcfg);
-            rcfg = 0;
-          }
+  case 'h':
+    print_runtime_commands();
+    break;
+  case 'p':
+    for (i = 0; i < num_instances; i++)
+      pause_pipeline(appCtx[i]);
+    break;
+  case 'r':
+    for (i = 0; i < num_instances; i++)
+      resume_pipeline(appCtx[i]);
+    break;
+  case 'q':
+    quit = TRUE;
+    g_main_loop_quit(main_loop);
+    ret = FALSE;
+    break;
+  case 'c':
+    if (appCtx[rcfg]->config.tiled_display_config.enable &&
+        selecting == FALSE && source_id == -1) {
+      if (log_level >= LOG_LVL_DEBUG)
+        g_print("--selecting config file --\n");
+      c = fgetc(stdin);
+      if (c >= '0' && c <= '9') {
+        rcfg = c - '0';
+        if (rcfg < num_instances) {
+          if (log_level >= LOG_LVL_DEBUG)
+            g_print("--selecting config  %d--\n", rcfg);
+        } else {
+          if (log_level >= LOG_LVL_DEBUG)
+            g_print("--selected config file %d out of bound, reenter\n", rcfg);
+          rcfg = 0;
         }
       }
-      break;
-    case 'z':
-      if (appCtx[rcfg]->config.tiled_display_config.enable && source_id == -1 &&
-          selecting == FALSE) {
-        if (log_level >= LOG_LVL_DEBUG) g_print("--selecting source --\n");
-        selecting = TRUE;
-      } else {
-        if (!show_bbox_text) {
-          GstElement *nvosd =
-              appCtx[rcfg]->pipeline.instance_bins[0].osd_bin.nvosd;
-          g_object_set(G_OBJECT(nvosd), "display-text", FALSE, NULL);
-          g_object_set(G_OBJECT(tiler), "show-source", -1, NULL);
-        }
-        appCtx[rcfg]->active_source_index = -1;
-        selecting = FALSE;
-        rcfg = 0;
-        if (log_level >= LOG_LVL_DEBUG) g_print("--tiled mode --\n");
+    }
+    break;
+  case 'z':
+    if (appCtx[rcfg]->config.tiled_display_config.enable && source_id == -1 &&
+        selecting == FALSE) {
+      if (log_level >= LOG_LVL_DEBUG)
+        g_print("--selecting source --\n");
+      selecting = TRUE;
+    } else {
+      if (!show_bbox_text) {
+        GstElement *nvosd =
+            appCtx[rcfg]->pipeline.instance_bins[0].osd_bin.nvosd;
+        g_object_set(G_OBJECT(nvosd), "display-text", FALSE, NULL);
+        g_object_set(G_OBJECT(tiler), "show-source", -1, NULL);
       }
-      break;
-    default:
-      break;
+      appCtx[rcfg]->active_source_index = -1;
+      selecting = FALSE;
+      rcfg = 0;
+      if (log_level >= LOG_LVL_DEBUG)
+        g_print("--tiled mode --\n");
+    }
+    break;
+  default:
+    break;
   }
   return ret;
 }
@@ -1448,73 +1436,77 @@ static gpointer nvds_x_event_thread(gpointer data) {
     while (XPending(display)) {
       XNextEvent(display, &e);
       switch (e.type) {
-        case ButtonPress: {
-          XWindowAttributes win_attr;
-          XButtonEvent ev = e.xbutton;
-          gint source_id;
-          GstElement *tiler;
+      case ButtonPress: {
+        XWindowAttributes win_attr;
+        XButtonEvent ev = e.xbutton;
+        gint source_id;
+        GstElement *tiler;
 
-          XGetWindowAttributes(display, ev.window, &win_attr);
+        XGetWindowAttributes(display, ev.window, &win_attr);
 
-          for (index = 0; index < MAX_INSTANCES; index++)
-            if (ev.window == windows[index]) break;
-
-          tiler = appCtx[index]->pipeline.tiled_display_bin.tiler;
-          g_object_get(G_OBJECT(tiler), "show-source", &source_id, NULL);
-
-          if (ev.button == Button1 && source_id == -1) {
-            source_id = get_source_id_from_coordinates(
-                ev.x * 1.0 / win_attr.width, ev.y * 1.0 / win_attr.height,
-                appCtx[index]);
-            if (source_id > -1) {
-              g_object_set(G_OBJECT(tiler), "show-source", source_id, NULL);
-              appCtx[index]->active_source_index = source_id;
-              appCtx[index]->show_bbox_text = TRUE;
-              GstElement *nvosd =
-                  appCtx[index]->pipeline.instance_bins[0].osd_bin.nvosd;
-              g_object_set(G_OBJECT(nvosd), "display-text", TRUE, NULL);
-            }
-          } else if (ev.button == Button3) {
-            g_object_set(G_OBJECT(tiler), "show-source", -1, NULL);
-            appCtx[index]->active_source_index = -1;
-            if (!show_bbox_text) {
-              appCtx[index]->show_bbox_text = FALSE;
-              GstElement *nvosd =
-                  appCtx[index]->pipeline.instance_bins[0].osd_bin.nvosd;
-              g_object_set(G_OBJECT(nvosd), "display-text", FALSE, NULL);
-            }
-          }
-        } break;
-        case KeyRelease: {
-          KeySym p, r, q;
-          guint i;
-          p = XKeysymToKeycode(display, XK_P);
-          r = XKeysymToKeycode(display, XK_R);
-          q = XKeysymToKeycode(display, XK_Q);
-          if (e.xkey.keycode == p) {
-            for (i = 0; i < num_instances; i++) pause_pipeline(appCtx[i]);
+        for (index = 0; index < MAX_INSTANCES; index++)
+          if (ev.window == windows[index])
             break;
-          }
-          if (e.xkey.keycode == r) {
-            for (i = 0; i < num_instances; i++) resume_pipeline(appCtx[i]);
-            break;
-          }
-          if (e.xkey.keycode == q) {
-            quit = TRUE;
-            g_main_loop_quit(main_loop);
-          }
-        } break;
-        case ClientMessage: {
-          Atom wm_delete;
-          for (index = 0; index < MAX_INSTANCES; index++)
-            if (e.xclient.window == windows[index]) break;
 
-          wm_delete = XInternAtom(display, "WM_DELETE_WINDOW", 1);
-          if (wm_delete != None && wm_delete == (Atom)e.xclient.data.l[0]) {
-            quit = TRUE;
-            g_main_loop_quit(main_loop);
+        tiler = appCtx[index]->pipeline.tiled_display_bin.tiler;
+        g_object_get(G_OBJECT(tiler), "show-source", &source_id, NULL);
+
+        if (ev.button == Button1 && source_id == -1) {
+          source_id = get_source_id_from_coordinates(
+              ev.x * 1.0 / win_attr.width, ev.y * 1.0 / win_attr.height,
+              appCtx[index]);
+          if (source_id > -1) {
+            g_object_set(G_OBJECT(tiler), "show-source", source_id, NULL);
+            appCtx[index]->active_source_index = source_id;
+            appCtx[index]->show_bbox_text = TRUE;
+            GstElement *nvosd =
+                appCtx[index]->pipeline.instance_bins[0].osd_bin.nvosd;
+            g_object_set(G_OBJECT(nvosd), "display-text", TRUE, NULL);
           }
-        } break;
+        } else if (ev.button == Button3) {
+          g_object_set(G_OBJECT(tiler), "show-source", -1, NULL);
+          appCtx[index]->active_source_index = -1;
+          if (!show_bbox_text) {
+            appCtx[index]->show_bbox_text = FALSE;
+            GstElement *nvosd =
+                appCtx[index]->pipeline.instance_bins[0].osd_bin.nvosd;
+            g_object_set(G_OBJECT(nvosd), "display-text", FALSE, NULL);
+          }
+        }
+      } break;
+      case KeyRelease: {
+        KeySym p, r, q;
+        guint i;
+        p = XKeysymToKeycode(display, XK_P);
+        r = XKeysymToKeycode(display, XK_R);
+        q = XKeysymToKeycode(display, XK_Q);
+        if (e.xkey.keycode == p) {
+          for (i = 0; i < num_instances; i++)
+            pause_pipeline(appCtx[i]);
+          break;
+        }
+        if (e.xkey.keycode == r) {
+          for (i = 0; i < num_instances; i++)
+            resume_pipeline(appCtx[i]);
+          break;
+        }
+        if (e.xkey.keycode == q) {
+          quit = TRUE;
+          g_main_loop_quit(main_loop);
+        }
+      } break;
+      case ClientMessage: {
+        Atom wm_delete;
+        for (index = 0; index < MAX_INSTANCES; index++)
+          if (e.xclient.window == windows[index])
+            break;
+
+        wm_delete = XInternAtom(display, "WM_DELETE_WINDOW", 1);
+        if (wm_delete != None && wm_delete == (Atom)e.xclient.data.l[0]) {
+          quit = TRUE;
+          g_main_loop_quit(main_loop);
+        }
+      } break;
       }
     }
     g_mutex_unlock(&disp_lock);
@@ -1616,9 +1608,8 @@ void apply_ota(AppCtx *ota_appCtx) {
                    model_engine_file_path, NULL);
     } else {
       if (log_level >= LOG_LVL_DEBUG) {
-        g_print(
-            "\nInvalid New Model Update Request received. Property "
-            "model-engine-path is not set\n");
+        g_print("\nInvalid New Model Update Request received. Property "
+                "model-engine-path is not set\n");
       }
     }
   }
@@ -1700,9 +1691,8 @@ gpointer ota_handler_thread(gpointer data) {
           connect_pgie_signal = TRUE;
         } else {
           if (log_level >= LOG_LVL_WARN) {
-            printf(
-                "Gstreamer pipeline element nvinfer is yet to be created or "
-                "invalid\n");
+            printf("Gstreamer pipeline element nvinfer is yet to be created or "
+                   "invalid\n");
           }
           continue;
         }
@@ -1759,11 +1749,10 @@ gpointer ota_handler_thread(gpointer data) {
                   NVGSTDS_ERR_MSG_V("Failed to parse config file '%s'",
                                     ota_ds_config_file);
                   if (log_level >= LOG_LVL_ERROR) {
-                    g_print(
-                        "Error: ota_handler_thread: Failed to parse config "
-                        "file "
-                        "'%s'",
-                        ota_ds_config_file);
+                    g_print("Error: ota_handler_thread: Failed to parse config "
+                            "file "
+                            "'%s'",
+                            ota_ds_config_file);
                   }
                 } else {
                   apply_ota(ota_appCtx);
@@ -1774,11 +1763,10 @@ gpointer ota_handler_thread(gpointer data) {
                   NVGSTDS_ERR_MSG_V("Failed to parse config file '%s'",
                                     ota_ds_config_file);
                   if (log_level >= LOG_LVL_ERROR) {
-                    g_print(
-                        "Error: ota_handler_thread: Failed to parse config "
-                        "file "
-                        "'%s'",
-                        ota_ds_config_file);
+                    g_print("Error: ota_handler_thread: Failed to parse config "
+                            "file "
+                            "'%s'",
+                            ota_ds_config_file);
                   }
                 } else {
                   apply_ota(ota_appCtx);
@@ -1947,58 +1935,63 @@ int main(int argc, char *argv[]) {
   g_img_meta_consumer = create_image_meta_consumer();
   NvDsImageSave nvds_imgsave = appCtx[0]->config.image_save_config;
   if (nvds_imgsave.enable) {
-      bool can_start = true;
-      if (!nvds_imgsave.output_folder_path) {
-          fprintf(stderr, "Consumer not started => consider adding output-folder-path=./my/path to [img-save]\n");
-          can_start = false;
-      }
-      if (!nvds_imgsave.frame_to_skip_rules_path) {
-          fprintf(stderr, 
-                "Consumer not started => consider adding frame-to-skip-rules-path=./my/path/to/file.csv to [img-save]\n");
-          can_start = false;
-      }
-      if (nvds_imgsave.second_to_skip_interval <= 0) {
-          printf("[WARNING] second-to-skip-interval value should be a positive integer. Setting to Default.\n");
-          nvds_imgsave.second_to_skip_interval = 600;
-      }
-      if (can_start) {
-          /* Initiating the encode process for images. Each init function creates a context
-            * on the specified gpu and can then be used to encode images. Multiple contexts
-            * (even on different gpus) can also be initialized according to user requirements.
-            * Only one is shown here for demonstration purposes. */
-          image_meta_consumer_init(g_img_meta_consumer,nvds_imgsave.gpu_id,
-                                    nvds_imgsave.output_folder_path, nvds_imgsave.frame_to_skip_rules_path,
-                                    nvds_imgsave.min_confidence, nvds_imgsave.max_confidence,
-                                    nvds_imgsave.min_box_width, nvds_imgsave.min_box_height,
-                                    nvds_imgsave.save_image_full_frame,
-                                    nvds_imgsave.save_image_cropped_object,
-                                    nvds_imgsave.second_to_skip_interval,
-                                    MAX_SOURCE_BINS);
-      }
-      if (image_meta_consumer_is_stopped(g_img_meta_consumer)) {
-           fprintf(stderr, "Consumer could not be started => exiting...\n\n");
-          return_value = -1;
-          goto done;
-      }
-
-  } else {
-   fprintf(stderr, "Consumer not started => consider setting enable=1 "
-                    "or adding [img-save] part in config file. (example below)\n"
-                    "[img-save]\n"
-                    "enable=1\n"
-                    "gpu_id=0\n"
-                    "output-folder-path=./output\n"
-                    "save-img-cropped-obj=0\n"
-                    "save-img-full-frame=1\n"
-                    "frame-to-skip-rules-path=capture_time_rules.csv\n"
-                    "second-to-skip-interval=600\n"
-                    "min-confidence=0.9\n"
-                    "max-confidence=1.0\n"
-                    "min-box-width=5\n"
-                    "min-box-height=5\n\n");
-
+    bool can_start = true;
+    if (!nvds_imgsave.output_folder_path) {
+      fprintf(stderr, "Consumer not started => consider adding "
+                      "output-folder-path=./my/path to [img-save]\n");
+      can_start = false;
+    }
+    if (!nvds_imgsave.frame_to_skip_rules_path) {
+      fprintf(stderr,
+              "Consumer not started => consider adding "
+              "frame-to-skip-rules-path=./my/path/to/file.csv to [img-save]\n");
+      can_start = false;
+    }
+    if (nvds_imgsave.second_to_skip_interval <= 0) {
+      printf("[WARNING] second-to-skip-interval value should be a positive "
+             "integer. Setting to Default.\n");
+      nvds_imgsave.second_to_skip_interval = 600;
+    }
+    if (can_start) {
+      /* Initiating the encode process for images. Each init function creates a
+       * context on the specified gpu and can then be used to encode images.
+       * Multiple contexts (even on different gpus) can also be initialized
+       * according to user requirements. Only one is shown here for
+       * demonstration purposes. */
+      image_meta_consumer_init(
+          g_img_meta_consumer, nvds_imgsave.gpu_id,
+          nvds_imgsave.output_folder_path,
+          nvds_imgsave.frame_to_skip_rules_path, nvds_imgsave.min_confidence,
+          nvds_imgsave.max_confidence, nvds_imgsave.min_box_width,
+          nvds_imgsave.min_box_height, nvds_imgsave.save_image_full_frame,
+          nvds_imgsave.save_image_cropped_object,
+          nvds_imgsave.second_to_skip_interval, MAX_SOURCE_BINS);
+    }
+    if (image_meta_consumer_is_stopped(g_img_meta_consumer)) {
+      fprintf(stderr, "Consumer could not be started => exiting...\n\n");
       return_value = -1;
       goto done;
+    }
+
+  } else {
+    fprintf(stderr,
+            "Consumer not started => consider setting enable=1 "
+            "or adding [img-save] part in config file. (example below)\n"
+            "[img-save]\n"
+            "enable=1\n"
+            "gpu_id=0\n"
+            "output-folder-path=./output\n"
+            "save-img-cropped-obj=0\n"
+            "save-img-full-frame=1\n"
+            "frame-to-skip-rules-path=capture_time_rules.csv\n"
+            "second-to-skip-interval=600\n"
+            "min-confidence=0.9\n"
+            "max-confidence=1.0\n"
+            "min-box-width=5\n"
+            "min-box-height=5\n\n");
+
+    return_value = -1;
+    goto done;
   }
   main_loop = g_main_loop_new(NULL, FALSE);
 
@@ -2094,7 +2087,7 @@ int main(int argc, char *argv[]) {
         XSetWMProtocols(display, windows[i], &wmDeleteMessage, 1);
       }
       XMapRaised(display, windows[i]);
-      XSync(display, 1);  // discard the events for now
+      XSync(display, 1); // discard the events for now
       gst_video_overlay_set_window_handle(
           GST_VIDEO_OVERLAY(
               appCtx[i]->pipeline.instance_bins[0].sink_bin.sub_bins[j].sink),
@@ -2216,17 +2209,17 @@ static void schema_fill_sample_sgie_vehicle_metadata(NvDsObjectMeta *obj_params,
   for (l = obj_params->classifier_meta_list; l != NULL; l = l->next) {
     NvDsClassifierMeta *classifierMeta = (NvDsClassifierMeta *)(l->data);
     switch (classifierMeta->unique_component_id) {
-      case SECONDARY_GIE_VEHICLE_TYPE_UNIQUE_ID:
-        obj->type = get_first_result_label(classifierMeta);
-        break;
-      case SECONDARY_GIE_VEHICLE_COLOR_UNIQUE_ID:
-        obj->color = get_first_result_label(classifierMeta);
-        break;
-      case SECONDARY_GIE_VEHICLE_MAKE_UNIQUE_ID:
-        obj->make = get_first_result_label(classifierMeta);
-        break;
-      default:
-        break;
+    case SECONDARY_GIE_VEHICLE_TYPE_UNIQUE_ID:
+      obj->type = get_first_result_label(classifierMeta);
+      break;
+    case SECONDARY_GIE_VEHICLE_COLOR_UNIQUE_ID:
+      obj->color = get_first_result_label(classifierMeta);
+      break;
+    case SECONDARY_GIE_VEHICLE_MAKE_UNIQUE_ID:
+      obj->make = get_first_result_label(classifierMeta);
+      break;
+    default:
+      break;
     }
   }
 }

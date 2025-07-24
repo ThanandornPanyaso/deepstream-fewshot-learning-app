@@ -20,26 +20,32 @@
 # DEALINGS IN THE SOFTWARE.
 
 [property]
+## model-specific params. The paths will be different if the user sets up in different directory.
 gpu-id=0
 offsets=123.675;116.28;103.53
 net-scale-factor=0.0173520735728
-# labelfile-path=../../../models/peoplenet_transformer/labels.txt
-labelfile-path=/opt/nvidia/deepstream/deepstream/sources/apps/sample_apps/deepstream-fewshot-learning-app/configs/mtmc/detector_labels.txt
-model-engine-file=/opt/nvidia/deepstream/deepstream-6.4/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/dino_model_op17.onnx_b1_gpu0_fp16.engine
-onnx-file=/opt/nvidia/deepstream/deepstream-6.4/sources/apps/sample_apps/deepstream-fewshot-learning-app/models/mtmc/dino_model_op17.onnx
-tlt-model-key=nvidia_tao
+labelfile-path=../../models/peoplenet_transformer/labels.txt
+model-engine-file=../../models/peoplenet_transformer/resnet50_peoplenet_transformer_op17.onnx_b30_gpu0_fp16.engine
+onnx-file=../../models/peoplenet_transformer/resnet50_peoplenet_transformer_op17.onnx
 batch-size=1
-## 0=FP32, 1=INT8, 2=FP16 mode
 network-mode=2
 num-detected-classes=4
 interval=0
 gie-unique-id=1
 output-blob-names=pred_boxes;pred_logits
 infer-dims=3;544;960
+workspace-size=1048576
 cluster-mode=4
 parse-bbox-func-name=NvDsInferParseCustomDDETRTAO
-custom-lib-path=../../custom_parser/libnvds_infercustomparser_tao.so
+custom-lib-path=../../post_processor/libnvds_infercustomparser_tao.so
+filter-out-class-ids=0;2;3
 
 [class-attrs-all]
-pre-cluster-threshold=0.3002599162473806
-topk=20
+dbscan-min-score=0.550968955940075
+eps=0.3685077750665506
+minBoxes=3
+nms-iou-threshold=0.3460713390741853
+pre-cluster-threshold=0.24234140082799116
+detected-min-w=128
+detected-min-h=256
+roi-top-offset=100

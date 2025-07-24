@@ -1,5 +1,6 @@
+#include "glib.h"
+#include "gst/gstclock.h"
 #include "gstnvdsmeta.h"
-#include "image_meta_consumer_wrapper.h"
 #include "nvbufsurface.h"
 #include "deepstream_app.h"
 #include "deepstream_config_file_parser.h"
@@ -13,10 +14,14 @@
 #include <memory>
 #include "nvds_obj_encode.h"
 #include "gst-nvmessage.h"
-
+#include "deepstream_fewshot_learning_app.h"
 #include "image_meta_consumer.h"
 #include "image_meta_producer.h"
 #include "image_meta_consumer_wrapper.h"
+#define MAX_TIME_STAMP_LEN (64)
+GstClockTime generate_ts_rfc3339_from_ts(char *buf, int buf_size,
+                                                GstClockTime ts, gchar *src_uri,
+                                                gint stream_id);
 
 // Object that will contain the necessary information for metadata file creation.
 // It consumes the metadata created by producers and write them into files.
@@ -84,7 +89,18 @@ static ImageMetaProducer::IPData make_ipdata(const AppCtx *appCtx,
     ipdata.video_path = appCtx->config.multi_source_config[ipdata.video_stream_nb].uri;
     std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::ostringstream oss;
-    oss << std::put_time(std::localtime(&t), "%FT%T%z");
+    //  oss << std::put_time(std::localtime(&t), "%FT%T%z");
+    gchar timestamp[MAX_TIME_STAMP_LEN] = {0};
+    GstClockTime ts_generated = 0;
+    guint32 stream_id = frame_meta->source_id;
+    GstClockTime ts = frame_meta->buf_pts;
+    ts_generated = generate_ts_rfc3339_from_ts(timestamp,MAX_TIME_STAMP_LEN,ts,
+        appCtx->config.multi_source_config[stream_id].uri,
+        stream_id);
+    // g_print("%s", timestamp);
+    oss << std::string(timestamp);
+   
+    (void)ts_generated;
     ipdata.datetime = oss.str();
     ipdata.image_cropped_obj_path_saved =
                 g_img_meta_consumer->make_img_path(ImageMetaConsumer::CROPPED_TO_OBJECT,
@@ -123,11 +139,27 @@ static bool obj_meta_box_is_above_minimum_dimension(const NvDsObjectMeta *obj_me
 /// @param [in] batch_meta Object containing information about neural network output.
 /// @param [in] index Not used here.
 ///
+
+
+static gpointer copy_image_path_meta(gpointer data, gpointer user_data) {
+  NvDsUserMeta *user_meta = (NvDsUserMeta *)data;
+  NvDsImagePathMeta *src_meta = (NvDsImagePathMeta *)user_meta->user_meta_data;
+  NvDsImagePathMeta *dst_meta = (NvDsImagePathMeta *)g_malloc0(sizeof(NvDsImagePathMeta));
+  strncpy(dst_meta->image_path, src_meta->image_path, sizeof(dst_meta->image_path) - 1);
+  return dst_meta;
+}
+
+static void release_image_path_meta(gpointer data, gpointer user_data) {
+  NvDsUserMeta *user_meta = (NvDsUserMeta *)data;
+  NvDsImagePathMeta *meta = (NvDsImagePathMeta *)user_meta->user_meta_data;
+  g_free(meta);
+}
 extern "C" void
 after_pgie_image_meta_save(AppCtx *appCtx, GstBuffer *buf,
                            NvDsBatchMeta *batch_meta, guint index, ImageMetaConsumerWrapper* consumer) {
     ImageMetaConsumer* consumer_ptr = image_meta_consumer_get_instance(consumer);
     g_img_meta_consumer = consumer_ptr;
+
     if (g_img_meta_consumer->get_is_stopped()) {
         std::cerr << "Could not save image and metadata: "
                   << "Consumer is stopped.\n";
@@ -148,7 +180,8 @@ after_pgie_image_meta_save(AppCtx *appCtx, GstBuffer *buf,
     bool at_least_one_image_saved = false;
 
     for (NvDsMetaList *l_frame = batch_meta->frame_meta_list; l_frame != nullptr;
-         l_frame = l_frame->next) {
+         l_frame = l_frame->next) 
+    {
         NvDsFrameMeta *frame_meta = static_cast<NvDsFrameMeta *>(l_frame->data);
         unsigned source_number = frame_meta->pad_index;
         if (g_img_meta_consumer->should_save_data(source_number)) {
@@ -196,9 +229,26 @@ after_pgie_image_meta_save(AppCtx *appCtx, GstBuffer *buf,
                 /// Store temporally information about the current object in the producer
                 bool data_was_stacked = img_producer.stack_obj_data(ipdata);
                 /// Save a cropped image if the option was enabled
-                if (data_was_stacked && g_img_meta_consumer->get_save_cropped_images_enabled())
+                if (data_was_stacked && g_img_meta_consumer->get_save_cropped_images_enabled()){
                     at_least_one_image_saved |= save_image(ipdata.image_cropped_obj_path_saved,
                                                            ip_surf, obj_meta, frame_meta, obj_counter);
+                    NvDsUserMeta *user_meta = nvds_acquire_user_meta_from_pool(batch_meta);
+                     if (user_meta) {
+                    // Allocate and fill our custom metadata struct
+                    NvDsImagePathMeta *path_meta = (NvDsImagePathMeta *)g_malloc0(sizeof(NvDsImagePathMeta));
+                    strncpy(path_meta->image_path, ipdata.image_cropped_obj_path_saved.c_str(), sizeof(path_meta->image_path) - 1);
+
+                    // Set the user_meta_data and functions
+                    user_meta->user_meta_data = (void *)path_meta;
+                    user_meta->base_meta.meta_type = (NvDsMetaType)NVDS_CUSTOM_IMAGE_PATH_META;
+                    user_meta->base_meta.copy_func = (NvDsMetaCopyFunc)copy_image_path_meta;
+                    user_meta->base_meta.release_func = (NvDsMetaReleaseFunc)release_image_path_meta;
+
+                    // Attach to the object metadata list
+                    nvds_add_user_meta_to_obj(obj_meta, user_meta);
+                    }
+                }
+                 
                 if (data_was_stacked && !full_frame_written
                     && g_img_meta_consumer->get_save_full_frame_enabled()) {
                     unsigned dummy_counter = 0;

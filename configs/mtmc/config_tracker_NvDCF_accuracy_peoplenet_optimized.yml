@@ -83,7 +83,7 @@ VisualTracker:
 ReID:
   reidType: 2
   outputReidTensor: 1
-  batchSize: 100
+  batchSize: 128
   workspaceSize: 4000
   reidFeatureSize: 1024
   reidHistorySize: 200
@@ -96,5 +96,5 @@ ReID:
   keepAspc: 1
   addFeatureNormalization: 1
   tltModelKey: nvidia_tao
-  onnxFile: ../../models/reid_model_latest.onnx
-  modelEngineFile: ../../models/reid_model_latest.onnx_b100_gpu0_fp16.engine
+  onnxFile: /opt/storage/reid_model_latest.onnx
+  modelEngineFile: /opt/storage/reid_model_latest.onnx_b128_gpu0_fp16.engine

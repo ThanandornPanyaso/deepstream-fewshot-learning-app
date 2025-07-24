@@ -22,33 +22,34 @@
 [application]
 enable-perf-measurement=1
 perf-measurement-interval-sec=5
-#terminated-track-output-dir=/home/bb24902/deepstream-fewshot-learning-app/terminated
-reid-track-output-dir=/home/bb24902/runOutput/20MarOutput/reid
-kitti-track-output-dir=/home/bb24902/runOutput/20MarOutput/kitti
+#terminated-track-output-dir=/home/big/deepstream-fewshot-learning-app/terminated
+#reid-track-output-dir=/home/big/deepstream-fewshot-learning-app/reid
+#kitti-track-output-dir=/home/big/deepstream-fewshot-learning-app/kitti
 [tiled-display]
-enable=0
-rows=1
-columns=2
-width=3840
+enable=1
+rows=6
+columns=5
+width=1920
 height=1080
 gpu-id=0
 nvbuf-memory-type=0
 
 # Sources
 [source-list]
-num-source-bins=2
-list=file:///home/bb24902/samples/Enter__3_20_2025_7_30_00_000_AM_UTC+07_00.mkv;file:///home/bb24902/samples/Exit__3_20_2025_7_30_00_000_AM_UTC+07_00.mkv
-
+num-source-bins=0
+#list=rtsp://127.0.0.1:8554/stream1;rtsp://127.0.0.1:8554/stream2;
+#list=file:///home/bb24902/samples/Enter__3_6_2025_11_30_00_000_AM_UTC+07_00.mkv;file:///home/bb24902/samples/Exit__3_6_2025_11_30_00_000_AM_UTC+07_00.mkv
+#list=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_1080p_h264.mp4
 #sensor-id-list vector is one to one mapped with the uri-list
 #identifies each sensor by a unique ID
-sensor-id-list=Building_K_Cam1;Building_K_Cam2
-
+sensor-id-list=stream1;stream2
+#sensor-id-list=UniqueSensorId1
 #Optional sensor-name-list vector is one to one mapped with the uri-list
-sensor-name-list=Building_K_Cam1;Building_K_Cam2
-
+sensor-name-list=stream1;stream2
+#sensor-name-list=UniqueSensorId1
 # Set use-nvmultiurisrcbin to 1 to enable sensor provisioning/update feature
-use-nvmultiurisrcbin=0
-#max-batch-size=2
+use-nvmultiurisrcbin=1
+max-batch-size=30
 http-ip=localhost
 http-port=9000
 
@@ -62,6 +63,7 @@ cudadec-memtype=0
 #rtsp-reconnect-interval-sec=0
 #latency=10000
 #select-rtp-protocol=4
+
 [sink0]
 enable=0
 #Type - 1=FakeSink 2=EglSink 3=File
@@ -71,8 +73,9 @@ source-id=0
 gpu-id=0
 nvbuf-memory-type=0
 qos=0
+
 [sink1]
-enable=0
+enable=1
 #Type - 1=FakeSink 2=EglSink 3=File 4=UDPSink 5=nvoverlaysink 6=MsgConvBroker
 type=6
 msg-conv-config=dstest5_msgconv_sample_config.txt
@@ -88,12 +91,9 @@ msg-conv-msg2p-new-api=0
 msg-conv-frame-interval=1
 msg-broker-proto-lib=/opt/nvidia/deepstream/deepstream-7.1/lib/libnvds_kafka_proto.so
 #Provide your msg-broker-conn-str here
-#msg-broker-conn-str=qvs-ds-kafka-01;9092;metromind-raw
-#topic=metromind-raw
-# msg-broker-conn-str=mdx-kafka-cluster-kafka-brokers;9092;mdx-raw
 msg-broker-conn-str=127.0.0.1;9092;mdx-raw
 topic=mdx-raw
-#topic=quickstart-events
+
 #Optional:
 #msg-broker-config=/opt/nvidia/deepstream/deepstream-7.1/sources/libs/kafka_protocol_adaptor/cfg_kafka.txt
 #new-api=0
@@ -102,7 +102,6 @@ topic=mdx-raw
 
 [sink2]
 enable=1
-gpu-id=0
 type=3
 #1=mp4 2=mkv
 container=2
@@ -111,13 +110,12 @@ container=2
 codec=3
 sync=0
 bitrate=2560000
-output-file=/home/bb24902/runOutput/20MarOutput/out1.mkv
+output-file=output/out.mkv
 source-id=0
 qos=0
 
 [sink3]
-enable=1
-gpu-id=0
+enable=0
 type=3
 #1=mp4 2=mkv
 container=2
@@ -126,7 +124,7 @@ container=2
 codec=3
 sync=0
 bitrate=2560000
-output-file=/home/bb24902/runOutput/20MarOutput/out2.mkv
+output-file=out2.mkv
 source-id=1
 qos=0
 
@@ -153,7 +151,7 @@ live-source=0
 batch-size=2
 ##time out in usec, to wait after the first buffer is available
 ##to push the batch even if the complete batch is not formed
-batched-push-timeout=40000
+batched-push-timeout=400000
 ## Set muxer output width and height
 width=1920
 height=1088
@@ -164,8 +162,8 @@ nvbuf-memory-type=0
 ## If set to TRUE, system timestamp will be attached as ntp timestamp
 ## If set to FALSE, ntp timestamp from rtspsrc, if available, will be attached
 attach-sys-ts-as-ntp=0
-drop-pipeline-eos=0
-
+drop-pipeline-eos=1
+live-source=1
 # config-file property is mandatory for any gie section.
 # Other properties are optional and if set will override the properties set in
 # the infer config file.
@@ -210,12 +208,12 @@ file-loop=0
 [img-save]
 enable=1
 gpu-id=0
-output-folder-path=/home/bb24902/runOutput/20MarOutput/output
+output-folder-path=output
 save-img-cropped-obj=1
 save-img-full-frame=0
-frame-to-skip-rules-path=capture_time_rules.csv
+frame-to-skip-rules-path=configs/capture_time_rules.csv
 second-to-skip-interval=600
 min-confidence=0.1
 max-confidence=1.0
-min-box-width=128
-min-box-height=256
+min-box-width=120
+min-box-height=20
